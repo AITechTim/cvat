@@ -103,9 +103,11 @@ services:
         PathPrefix(`/api/`, `/static/`, `/admin`, `/documentation/`, `/django-rq`)
       - traefik.http.routers.cvat.entrypoints=web
     volumes:
-      - cvat_data:/home/django/data
+      # - /cvat/cvat_data:/home/django/data
       - cvat_keys:/home/django/keys
       - cvat_logs:/home/django/logs
+      - cvat_data:/home/django/data
+      - roi_dav_volume:/home/django/share:ro
     networks:
       cvat:
         aliases:
@@ -141,6 +143,7 @@ services:
       - cvat_data:/home/django/data
       - cvat_keys:/home/django/keys
       - cvat_logs:/home/django/logs
+      - roi_dav_volume:/home/django/share:ro
     networks:
       - cvat
 
@@ -157,6 +160,7 @@ services:
       - cvat_data:/home/django/data
       - cvat_keys:/home/django/keys
       - cvat_logs:/home/django/logs
+      - roi_dav_volume:/home/django/share:ro
     networks:
       - cvat
 
@@ -173,6 +177,7 @@ services:
       - cvat_data:/home/django/data
       - cvat_keys:/home/django/keys
       - cvat_logs:/home/django/logs
+      - roi_dav_volume:/home/django/share:ro
     networks:
       - cvat
 
@@ -238,13 +243,13 @@ services:
     networks:
       - cvat
 
-  traefik:
+  cvat_traefik:
     image: traefik:v2.10
-    container_name: traefik
+    container_name: cvat_traefik
     restart: always
-    ports:
-      - 8080:8080
-      - 8090:8090
+    expose:
+      - 8080
+      - 8090
     environment:
       CVAT_HOST: ${CVAT_HOST:-localhost}
       DJANGO_LOG_VIEWER_HOST: grafana
@@ -274,6 +279,7 @@ services:
       - ./components/analytics/grafana_conf.yml:/etc/traefik/rules/grafana_conf.yml:ro
     networks:
       - cvat
+      - public
     logging:
       driver: "json-file"
       options:
@@ -390,6 +396,11 @@ volumes:
   cvat_inmem_db:
   cvat_events_db:
   cvat_cache_db:
+  roi_dav_volume:
+    external: true
 
 networks:
   cvat:
+  public:
+    name: public-facing-nginx-managed-network
+    external: true

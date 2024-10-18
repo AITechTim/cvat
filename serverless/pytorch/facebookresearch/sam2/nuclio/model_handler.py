@@ -25,11 +25,14 @@ class ModelHandler:
         pos_points, neg_points = list(pos_points), list(neg_points)
         with torch.inference_mode():
             self.predictor.set_image(np.array(image))
-            masks, scores, _ = self.predictor.predict(
-                point_coords=np.array(pos_points + neg_points),
-                point_labels=np.array([1]*len(pos_points) + [0]*len(neg_points)),
-                multimask_output=True,
-            )
-            sorted_ind = np.argsort(scores)[::-1]
-            best_mask = masks[sorted_ind][0]
-            return best_mask
+            features = self.predictor.get_image_embedding()
+            high_res_features = self.predictor._features["high_res_feats"]
+            return features, high_res_features
+            # masks, scores, _ = self.predictor.predict(
+            #     point_coords=np.array(pos_points + neg_points),
+            #     point_labels=np.array([1]*len(pos_points) + [0]*len(neg_points)),
+            #     multimask_output=True,
+            # )
+            # sorted_ind = np.argsort(scores)[::-1]
+            # best_mask = masks[sorted_ind][0]
+            # return best_mask

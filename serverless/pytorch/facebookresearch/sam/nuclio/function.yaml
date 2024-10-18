@@ -58,7 +58,7 @@ spec:
       kind: 'http'
       workerAvailabilityTimeoutMilliseconds: 10000
       attributes:
-        maxRequestBodySize: 33554432 # 32MB
+        maxRequestBodySize: 3355443200 # 3200MB
 
   platform:
     attributes:

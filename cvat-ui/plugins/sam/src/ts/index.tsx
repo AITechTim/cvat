@@ -47,6 +47,8 @@ interface SAMPlugin {
         modelID: string;
         modelURL: string;
         embeddings: LRUCache<string, Tensor>;
+        highResFeats0: LRUCache<string, Tensor>;
+        highResFeats1: LRUCache<string, Tensor>;
         lowResMasks: LRUCache<string, Tensor>;
         lastClicks: ClickType[];
     };
@@ -70,10 +72,12 @@ function getModelScale(w: number, h: number): number {
 
 function modelData(
     {
-        clicks, tensor, modelScale, maskInput,
+        clicks, tensor, highResTensor0, highResTensor1, modelScale, maskInput,
     }: {
         clicks: ClickType[];
         tensor: Tensor;
+        highResTensor0: Tensor;
+        highResTensor1: Tensor;
         modelScale: { height: number; width: number; scale: number };
         maskInput: Tensor | null;
     },
@@ -101,7 +105,9 @@ function modelData(
     const hasMaskInput = new Tensor('float32', [maskInput ? 1 : 0]);
 
     return {
-        image_embeddings: imageEmbedding,
+        image_embed: imageEmbedding,
+        high_res_feats_0: highResTensor0,
+        high_res_feats_1: highResTensor1,
         point_coords: pointCoordsTensor,
         point_labels: pointLabelsTensor,
         orig_im_size: imageSizeTensor,
@@ -144,7 +150,8 @@ const samPlugin: SAMPlugin = {
                                 resolve(null);
                             }
                         }
-
+                        console.log('model.id', model.id);
+                        console.log('plugin.data.modelID', plugin.data.modelID);
                         if (model.id === plugin.data.modelID) {
                             if (!plugin.data.initialized) {
                                 samPlugin.data.worker.postMessage({
@@ -216,13 +223,15 @@ const samPlugin: SAMPlugin = {
                                 const key = `${taskID}_${frame}`;
 
                                 if (result) {
-                                    const bin = window.atob(result.blob);
+                                    const bin = window.atob(result["image_embed"]);
                                     const uint8Array = new Uint8Array(bin.length);
                                     for (let i = 0; i < bin.length; i++) {
                                         uint8Array[i] = bin.charCodeAt(i);
                                     }
                                     const float32Arr = new Float32Array(uint8Array.buffer);
                                     plugin.data.embeddings.set(key, new Tensor('float32', float32Arr, [1, 256, 64, 64]));
+                                    plugin.data.highResFeats0.set(key, new Tensor('float32', float32Arr, [1, 256, 64, 64]));
+                                    plugin.data.highResFeats1.set(key, new Tensor('float32', float32Arr, [1, 256, 64, 64]));
                                 }
 
                                 const modelScale = {
@@ -244,12 +253,13 @@ const samPlugin: SAMPlugin = {
                                 neg_points.forEach((point) => {
                                     clicks.push({ clickType: 0, x: point[0], y: point[1] });
                                 });
-
                                 const isLowResMaskSuitable = JSON
                                     .stringify(clicks.slice(0, -1)) === JSON.stringify(plugin.data.lastClicks);
                                 const feeds = modelData({
                                     clicks,
                                     tensor: plugin.data.embeddings.get(key) as Tensor,
+                                    highResTensor0: plugin.data.highResFeats0.get(key) as Tensor,
+                                    highResTensor1: plugin.data.highResFeats1.get(key) as Tensor,
                                     modelScale,
                                     maskInput: isLowResMaskSuitable ? plugin.data.lowResMasks.get(key) || null : null,
                                 });
@@ -316,9 +326,23 @@ const samPlugin: SAMPlugin = {
         core: null,
         worker: new Worker(new URL('./inference.worker', import.meta.url)),
         jobs: {},
-        modelID: 'pth-facebookresearch-sam-vit-h',
-        modelURL: '/assets/decoder.onnx',
+        modelID: 'pth-facebookresearch-sam2-vit-h-allmodels',
+        modelURL: '/assets/sam2_hiera_large.decoder.onnx',
+        // modelID: 'pth-facebookresearch-sam2-vit-h',
+        // modelURL: '/assets/decoder.onnx',
         embeddings: new LRUCache({
+            // float32 tensor [256, 64, 64] is 4 MB, max 128 MB
+            max: 32,
+            updateAgeOnGet: true,
+            updateAgeOnHas: true,
+        }),
+        highResFeats0: new LRUCache({
+            // float32 tensor [256, 64, 64] is 4 MB, max 128 MB
+            max: 32,
+            updateAgeOnGet: true,
+            updateAgeOnHas: true,
+        }),
+        highResFeats1: new LRUCache({
             // float32 tensor [256, 64, 64] is 4 MB, max 128 MB
             max: 32,
             updateAgeOnGet: true,

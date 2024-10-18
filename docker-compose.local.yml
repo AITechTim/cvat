@@ -107,7 +107,7 @@ services:
       - cvat_keys:/home/django/keys
       - cvat_logs:/home/django/logs
       - cvat_data:/home/django/data
-      - roi_dav_volume:/home/django/share:ro
+      - /mnt/shared/prepared_data/ROI_dataset/:/home/django/share:ro
     networks:
       cvat:
         aliases:
@@ -143,7 +143,7 @@ services:
       - cvat_data:/home/django/data
       - cvat_keys:/home/django/keys
       - cvat_logs:/home/django/logs
-      - roi_dav_volume:/home/django/share:ro
+      - /mnt/shared/prepared_data/ROI_dataset/:/home/django/share:ro
     networks:
       - cvat
 
@@ -160,7 +160,7 @@ services:
       - cvat_data:/home/django/data
       - cvat_keys:/home/django/keys
       - cvat_logs:/home/django/logs
-      - roi_dav_volume:/home/django/share:ro
+      - /mnt/shared/prepared_data/ROI_dataset/:/home/django/share:ro
     networks:
       - cvat
 
@@ -177,7 +177,7 @@ services:
       - cvat_data:/home/django/data
       - cvat_keys:/home/django/keys
       - cvat_logs:/home/django/logs
-      - roi_dav_volume:/home/django/share:ro
+      - /mnt/shared/prepared_data/ROI_dataset/:/home/django/share:ro
     networks:
       - cvat
 
@@ -230,8 +230,17 @@ services:
       - cvat
 
   cvat_ui:
+    # build:
+    #   context: .
+    #   args:
+    #     http_proxy:
+    #     https_proxy:
+    #     no_proxy:
+    #     socks_proxy:
+    #   dockerfile: Dockerfile.ui
     container_name: cvat_ui
-    image: cvat/ui:${CVAT_VERSION:-dev}
+    # image: cvat/ui:${CVAT_VERSION:-dev}
+    image: cvat-cvat_ui:latest
     restart: always
     depends_on:
       - cvat_server
@@ -396,8 +405,6 @@ volumes:
   cvat_inmem_db:
   cvat_events_db:
   cvat_cache_db:
-  roi_dav_volume:
-    external: true
 
 networks:
   cvat:

@@ -7,7 +7,7 @@ import base64
 from PIL import Image
 import io
 from model_handler import ModelHandler
-
+import numpy as np
 def init_context(context):
     model = ModelHandler()
     context.user_data.model = model
@@ -23,10 +23,22 @@ def handler(context, event):
         pos_points = data["pos_points"]
         neg_points = data["neg_points"]
 
-        mask = context.user_data.model.handle(image, pos_points, neg_points)
+        # mask = context.user_data.model.handle(image, pos_points, neg_points)
+        features, high_res_features = context.user_data.model.handle(image, pos_points, neg_points)
 
-        return context.Response(
-            body=json.dumps({'mask': mask.tolist()}),
+        image_embed = np.ascontiguousarray((features.cpu().numpy() if features.is_cuda else features.numpy()))
+        high_res_feats_0 = np.ascontiguousarray((high_res_features.cpu().numpy()[0] if high_res_features.is_cuda else high_res_features.numpy()[0]))
+        high_res_feats_1 = np.ascontiguousarray((high_res_features.cpu().numpy()[1] if high_res_features.is_cuda else high_res_features.numpy()[1]))
+        print(high_res_feats_0.shape)
+        print(high_res_feats_1.shape)
+        print(image_embed.shape)
+
+        return context.Response(body=json.dumps({
+            'image_embed': base64.b64encode(image_embed).decode(),
+            'high_res_feats_0': base64.b64encode(high_res_feats_0).decode(),
+            'high_res_feats_1': base64.b64encode(high_res_feats_1).decode(),
+        }),
+            # body=json.dumps({'mask': mask.tolist()}),
             headers={},
             content_type='application/json',
             status_code=200

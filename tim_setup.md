@@ -26,8 +26,7 @@ sudo mv nuctl-1.13.0-linux-amd64 /usr/local/bin/nuctl
 - deploy example functions
 ./serverless/deploy_cpu.sh serverless/openvino/dextr
 ./serverless/deploy_cpu.sh serverless/openvino/omz/public/yolo-v3-tf
-
-docker compose up -d
+ ./serverless/deploy_cpu.sh serverless/pytorch/facebookresearch/sam2/nuclio
 
 - nuclio dashboard: localhost:8070
 - cvat ui: localhost:8080 / cvat.cancili.co

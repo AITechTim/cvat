@@ -90,7 +90,18 @@ services:
     ports:
       - '9091:9091'
 
+  # cvat_ui:
+  #   build:
+  #     context: .
+  #     args:
+  #       http_proxy:
+  #       https_proxy:
+  #       no_proxy:
+  #       socks_proxy:
+  #     dockerfile: Dockerfile.ui
   cvat_ui:
+    # image: cvat/ui:${CVAT_VERSION:-dev}
+    # image: cvat-cvat_ui:latest
     build:
       context: .
       args:
@@ -99,6 +110,30 @@ services:
         no_proxy:
         socks_proxy:
       dockerfile: Dockerfile.ui
+    container_name: cvat_ui
+    restart: always
+    expose:
+      - 8080
+    depends_on:
+      - cvat_server
+    environment:
+      CVAT_UI_HOST: ${CVAT_UI_HOST:-0.0.0.0}
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.cvat-ui.loadbalancer.server.port=8080
+      - traefik.http.routers.cvat-ui.rule=Host(`${CVAT_HOST:-localhost}`)
+      - traefik.http.routers.cvat-ui.entrypoints=web
+    networks:
+      - cvat
+    volumes:
+      - ./package.json:/tmp/package.json
+      - ./yarn.lock:/tmp/yarn.lock
+      - ./cvat-ui:/tmp/cvat-ui
+      - ./cvat-core:/tmp/cvat-core
+      - ./cvat-canvas:/tmp/cvat-canvas
+      - ./cvat-canvas3d:/tmp/cvat-canvas3d
+      - ./cvat-data:/tmp/cvat-data
+
 
   cvat_clickhouse:
     ports:

@@ -52,7 +52,7 @@ module.exports = (env) => {
             client: {
                 overlay: false,
             },
-            port: 3000,
+            port: 8080,
             historyApiFallback: true,
             static: {
                 directory: path.join(__dirname, 'dist'),
@@ -72,6 +72,9 @@ module.exports = (env) => {
                     target: env && env.API_URL,
                     secure: false,
                     changeOrigin: true,
+                    headers: {
+                        'Host': '127.0.0.1:8080'
+                    }
                 },
             ],
         },

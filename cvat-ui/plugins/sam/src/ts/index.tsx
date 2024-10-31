@@ -110,7 +110,7 @@ function modelData(
         high_res_feats_1: highResTensor1,
         point_coords: pointCoordsTensor,
         point_labels: pointLabelsTensor,
-        orig_im_size: imageSizeTensor,
+        // orig_im_size: imageSizeTensor,
         mask_input: prevMask,
         has_mask_input: hasMaskInput,
     };
@@ -230,8 +230,8 @@ const samPlugin: SAMPlugin = {
                                     }
                                     const float32Arr = new Float32Array(uint8Array.buffer);
                                     plugin.data.embeddings.set(key, new Tensor('float32', float32Arr, [1, 256, 64, 64]));
-                                    plugin.data.highResFeats0.set(key, new Tensor('float32', float32Arr, [1, 256, 64, 64]));
-                                    plugin.data.highResFeats1.set(key, new Tensor('float32', float32Arr, [1, 256, 64, 64]));
+                                    plugin.data.highResFeats0.set(key, new Tensor('float32', float32Arr, [1, 32, 256, 256]));
+                                    plugin.data.highResFeats1.set(key, new Tensor('float32', float32Arr, [1, 64, 128, 128]));
                                 }
 
                                 const modelScale = {

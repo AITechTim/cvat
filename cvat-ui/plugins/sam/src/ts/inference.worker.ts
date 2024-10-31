@@ -23,7 +23,7 @@ export interface DecodeBody {
     high_res_feats_1: Tensor;
     point_coords: Tensor;
     point_labels: Tensor;
-    orig_im_size: Tensor;
+    // orig_im_size: Tensor;
     mask_input: Tensor;
     has_mask_input: Tensor;
     readonly [name: string]: Tensor;

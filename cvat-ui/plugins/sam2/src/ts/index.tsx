@@ -8,20 +8,20 @@ import { CVATCore, MLModel, Job } from 'cvat-core-wrapper';
 import { PluginEntryPoint, APIWrapperEnterOptions, ComponentBuilder } from 'components/plugins-entrypoint';
 import { InitBody, DecodeBody, WorkerAction } from './inference.worker';
 
-interface SAMPlugin {
+interface SAM2Plugin {
     name: string;
     description: string;
     cvat: {
         lambda: {
             call: {
                 enter: (
-                    plugin: SAMPlugin,
+                    plugin: SAM2Plugin,
                     taskID: number,
                     model: MLModel,
                     args: any,
                 ) => Promise<null | APIWrapperEnterOptions>;
                 leave: (
-                    plugin: SAMPlugin,
+                    plugin: SAM2Plugin,
                     result: object,
                     taskID: number,
                     model: MLModel,
@@ -32,7 +32,7 @@ interface SAMPlugin {
         jobs: {
             get: {
                 leave: (
-                    plugin: SAMPlugin,
+                    plugin: SAM2Plugin,
                     results: any[],
                     query: { jobID?: number }
                 ) => Promise<any>;
@@ -116,14 +116,14 @@ function modelData(
     };
 }
 
-const samPlugin: SAMPlugin = {
+const samPlugin2: SAM2Plugin = {
     name: 'Segment Anything',
     description: 'Handles non-default SAM serverless function output',
     cvat: {
         jobs: {
             get: {
                 async leave(
-                    plugin: SAMPlugin,
+                    plugin: SAM2Plugin,
                     results: any[],
                     query: { jobID?: number },
                 ): Promise<any> {
@@ -137,7 +137,7 @@ const samPlugin: SAMPlugin = {
         lambda: {
             call: {
                 async enter(
-                    plugin: SAMPlugin,
+                    plugin: SAM2Plugin,
                     taskID: number,
                     model: MLModel, { frame }: { frame: number },
                 ): Promise<null | APIWrapperEnterOptions> {
@@ -154,14 +154,14 @@ const samPlugin: SAMPlugin = {
                         console.log('plugin.data.modelID', plugin.data.modelID);
                         if (model.id === plugin.data.modelID) {
                             if (!plugin.data.initialized) {
-                                samPlugin.data.worker.postMessage({
+                                samPlugin2.data.worker.postMessage({
                                     action: WorkerAction.INIT,
                                     payload: {
-                                        decoderURL: samPlugin.data.modelURL,
+                                        decoderURL: samPlugin2.data.modelURL,
                                     } as InitBody,
                                 });
 
-                                samPlugin.data.worker.onmessage = (e: MessageEvent) => {
+                                samPlugin2.data.worker.onmessage = (e: MessageEvent) => {
                                     if (e.data.action !== WorkerAction.INIT) {
                                         reject(new Error(
                                             `Caught unexpected action response from worker: ${e.data.action}`,
@@ -169,7 +169,7 @@ const samPlugin: SAMPlugin = {
                                     }
 
                                     if (!e.data.error) {
-                                        samPlugin.data.initialized = true;
+                                        samPlugin2.data.initialized = true;
                                         resolvePromise();
                                     } else {
                                         reject(new Error(`SAM worker was not initialized. ${e.data.error}`));
@@ -185,7 +185,7 @@ const samPlugin: SAMPlugin = {
                 },
 
                 async leave(
-                    plugin: SAMPlugin,
+                    plugin: SAM2Plugin,
                     result: any,
                     taskID: number,
                     model: MLModel,
@@ -377,11 +377,11 @@ const samPlugin: SAMPlugin = {
 };
 
 const builder: ComponentBuilder = ({ core }) => {
-    samPlugin.data.core = core;
-    core.plugins.register(samPlugin);
+    samPlugin2.data.core = core;
+    core.plugins.register(samPlugin2);
 
     return {
-        name: samPlugin.name,
+        name: samPlugin2.name,
         destructor: () => {},
     };
 };

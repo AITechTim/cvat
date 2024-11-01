@@ -24,12 +24,14 @@ def handler(context, event):
         neg_points = data["neg_points"]
 
         # mask = context.user_data.model.handle(image, pos_points, neg_points)
-        features, high_res_features = context.user_data.model.handle(image, pos_points, neg_points)
-        print(len(high_res_features))
-        print(high_res_features[0].shape)
+        # features, high_res_features = context.user_data.model.handle(image, pos_points, neg_points)
+        high_res_feats_0, high_res_feats_1, image_embed = context.user_data.model.handle(image, pos_points, neg_points)
+        print(len(high_res_feats_0))
+        print(high_res_feats_0[0].shape)
         # high_res_features = high_res_features[0]
-        print(features)
-        print(high_res_features)
+        print(image_embed)
+        print(high_res_feats_0)
+        print(high_res_feats_1)
         image_embed = np.ascontiguousarray((features.cpu().numpy() if features.is_cuda else features.numpy()))
         high_res_feats_0 = np.ascontiguousarray((high_res_features[0].cpu().numpy() if high_res_features[0].is_cuda else high_res_features[0].numpy()))
         high_res_feats_1 = np.ascontiguousarray((high_res_features[1].cpu().numpy() if high_res_features[1].is_cuda else high_res_features[1].numpy()))

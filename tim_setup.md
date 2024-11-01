@@ -53,6 +53,7 @@ sudo mv nuctl-1.13.0-linux-amd64 /usr/local/bin/nuctl
 - deploy example functions
 ./serverless/deploy_cpu.sh serverless/openvino/dextr
 ./serverless/deploy_cpu.sh serverless/openvino/omz/public/yolo-v3-tf
+./serverless/deploy_cpu.sh serverless/pytorch/facebookresearch/sam/nuclio
 ./serverless/deploy_cpu.sh serverless/pytorch/facebookresearch/sam2/nuclio
 - Port will change regularly, check nuclio dashboard matches docker ps. Otherwise delete function on dashboard and redeploy with above command.
 

@@ -18,10 +18,12 @@ export interface InitBody {
 }
 
 export interface DecodeBody {
-    image_embeddings: Tensor;
+    image_embed: Tensor;
+    high_res_feats_0: Tensor;
+    high_res_feats_1: Tensor;
     point_coords: Tensor;
     point_labels: Tensor;
-    orig_im_size: Tensor;
+    // orig_im_size: Tensor;
     mask_input: Tensor;
     has_mask_input: Tensor;
     readonly [name: string]: Tensor;
@@ -75,11 +77,11 @@ if ((self as any).importScripts) {
                     action: WorkerAction.DECODE,
                     payload: {
                         masks: results.masks,
-                        lowResMasks: results.low_res_masks,
-                        xtl: Number(results.xtl.data[0]),
-                        ytl: Number(results.ytl.data[0]),
-                        xbr: Number(results.xbr.data[0]),
-                        ybr: Number(results.ybr.data[0]),
+                        // lowResMasks: results.low_res_masks,
+                        // xtl: Number(results.xtl.data[0]),
+                        // ytl: Number(results.ytl.data[0]),
+                        // xbr: Number(results.xbr.data[0]),
+                        // ybr: Number(results.ybr.data[0]),
                     },
                 });
             }).catch((error: unknown) => {

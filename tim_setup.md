@@ -1,3 +1,4 @@
+sudo apt-get install ca-certificates davfs2 
 git clone https://github.com/cvat-ai/cvat
 cd cvat
 
@@ -10,17 +11,30 @@ docker volume create \
 
 sudo mount /mnt/shared
 
-docker exec -it cvat_server bash -ic 'python3 ~/manage.py createsuperuser'
 export CVAT_HOST=cvat.cancili.co
+
+export CVAT_HOST=cvat.cancilico.site
+<!-- export CVAT_UI_HOST=cvat.cancilico.site -->
+
 export CVAT_HOST=localhost
-export CVAT_UI_HOST=localhost
+<!-- export CVAT_UI_HOST=localhost -->
+
 export CVAT_SERVERLESS=1
 
 <!-- docker compose -f docker-compose.local.yml -f components/serverless/docker-compose.serverless.yml up -d --build
 docker compose -f docker-compose.local.yml -f components/serverless/docker-compose.serverless.yml down -->
 <!-- Drop above, the below official dev setup is recommended. -->
 
-docker compose -f docker-compose.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml up -d --build --remove-orphans
+
+- for https
+export ACME_EMAIL=schmittman@cancilico.com
+docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.https.yml -f components/serverless/docker-compose.serverless.yml up --build --remove-orphans
+
+
+
+docker exec -it cvat_server bash -ic 'python3 ~/manage.py createsuperuser'
+
 docker compose -f docker-compose.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml up
 
 ## Some troubleshooting for dev mode

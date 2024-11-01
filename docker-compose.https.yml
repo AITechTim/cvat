@@ -13,9 +13,9 @@ services:
       - traefik.http.routers.cvat-ui.entrypoints=websecure
       - traefik.http.routers.cvat-ui.tls.certresolver=lets-encrypt
 
-  traefik:
+  cvat_traefik:
     image: traefik:v2.9
-    container_name: traefik
+    container_name: cvat_traefik
     environment:
       TRAEFIK_ENTRYPOINTS_web_ADDRESS: :80
       TRAEFIK_ENTRYPOINTS_web_HTTP_REDIRECTIONS_ENTRYPOINT_TO: websecure

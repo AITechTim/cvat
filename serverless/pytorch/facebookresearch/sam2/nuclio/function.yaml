@@ -22,7 +22,7 @@ spec:
   eventTimeout: 30s
 
   build:
-    image: cvat.pth.facebookresearch.sam2.large.cpu
+    image: cvat.pth.facebookresearch.sam2:large-cpu
     baseImage: sam2-samexport-allmodels:latest-cpu
 # pth-facebookresearch-sam2-vit-h-allmodels:latest
     directives:

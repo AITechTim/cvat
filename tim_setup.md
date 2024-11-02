@@ -29,17 +29,28 @@ export CVAT_SERVERLESS=1
 <!-- docker compose -f docker-compose.local.yml -f components/serverless/docker-compose.serverless.yml up -d --build
 docker compose -f docker-compose.local.yml -f components/serverless/docker-compose.serverless.yml down -->
 <!-- Drop above, the below official dev setup is recommended. -->
-
+## Running dev mode
+### HTTP
 docker compose -f docker-compose.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml up -d --build --remove-orphans
 
-- for https
+### HTTPS
 export ACME_EMAIL=schmittman@cancilico.com
 docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.https.yml -f components/serverless/docker-compose.serverless.yml up --build --remove-orphans
 
-
+## Production mode
+- Build docker UI image. Don't get confused by the dev tag, any self built image should have dev tag all others should get pulled from docker hub.
+```
+docker build -t cvat/ui:dev -f Dockerfile.ui .
+```
+- Run production docker compose
+```
+export ACME_EMAIL=schmittman@cancilico.com
+export CVAT_VERSION=prod
+docker compose -f docker-compose.yml -f docker-compose.https.yml -f components/serverless/docker-compose.serverless.yml up -d --build --remove-orphans
+```
+## Initial Setup
 docker exec -it cvat_server bash -ic 'python3 ~/manage.py createsuperuser'
 
-docker compose -f docker-compose.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml up
 
 ## Some troubleshooting for dev mode
 - Make sure to run traffic via traefik. Otherwise you will get CORS errors when trying to access backend.

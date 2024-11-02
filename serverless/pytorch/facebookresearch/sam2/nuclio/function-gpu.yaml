@@ -22,7 +22,7 @@ spec:
   eventTimeout: 30s
 
   build:
-    image: cvat.pth.facebookresearch.sam2.large.gpu
+    image: cvat.pth.facebookresearch.sam2:large-gpu
     baseImage: sam2-samexport-allmodels:latest-gpu
     directives:
       preCopy:

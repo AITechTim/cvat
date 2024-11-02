@@ -1,3 +1,8 @@
+
+# Enable GPU for docker
+- https://collabnix.com/introducing-new-docker-cli-api-support-for-nvidia-gpus-under-docker-engine-19-03-0-beta-release/
+
+
 sudo apt-get install ca-certificates davfs2 
 git clone https://github.com/cvat-ai/cvat
 cd cvat
@@ -58,18 +63,45 @@ sudo mv nuctl-1.13.0-linux-amd64 /usr/local/bin/nuctl
 
 ## Testing fininshed image as standalone container
 docker run --volume /var/lib/docker/volumes/nuclio-nuclio-pth-facebookresearch-sam2-vit-h-allmodels/_data:/etc/nuclio/config/processor cvat.pth.facebookresearch.sam2.vit_h_allmodels:latest processor
+
 ## deploy finished image as nuclio function (Still has some issues. Get's registered in nuclio, but https://cvat.cancilico.site/api/lambda/functions gives 500 server error. Probably due to wrong config, should pass function.yaml as well.)
 nuctl deploy pth-facebookresearch-sam2-vit-h-allmodels --run-image cvat.pth.facebookresearch.sam2.vit_h_allmodels:latest  --handler main:handler --project-name cvat --platform local --runtime python:3.9
 
-nuctl delete function -f pth-facebookresearch-sam2-vit-h-allmodels && ./serverless/deploy_cpu.sh serverless/pytorch/facebookresearch/sam2/nuclio 
-
+## Some leftover code snippets
+```
 docker run --volume nuclio-cvat-pth-facebookresearch-sam2-vit-h-allmodels:/etc/nuclio/config/processor cvat.pth.facebookresearch.sam2.vit_h_allmodels:latest processor
 
 nuctl deploy cvat.pth.facebookresearch.sam2.vit_h_allmodels:latest processor --handler main:handler --namespace cvat 
 
-
-
 nuctl deploy pth-facebookresearch-sam2-vit-h-allmodels --run-image nuclio/processor-pth-facebookresearch-sam2-vit-h-allmodels:latest --runtime python:3.10 --handler main:handler --namespace cvat 
+```
+
+## Developing images on nuclio
+### CPU
+- Build basic docker image. For speeding up development, I recommend putting most logic in the Dockerfile.dev and use that as base_image in function.yaml. Also function.yaml is very badly documented.
+```
+cd cvat/serverless/pytorch/facebookresearch/sam2/nuclio
+docker build -f Dockerfile.dev -t sam2-samexport-allmodels:latest-cpu .
+```
+- Deploy function (get name from function.yaml)
+```
+nuctl delete function -f pth-facebookresearch-sam2-large-cpu && ./serverless/deploy_cpu.sh serverless/pytorch/facebookresearch/sam2/nuclio && docker logs -f nuclio-nuclio-pth-facebookresearch-sam2-large-cpu
+```
+### GPU
+- Build gpu docker image
+```
+cd cvat/serverless/pytorch/facebookresearch/sam2/nuclio
+docker build -f Dockerfile.gpu -t sam2-samexport-allmodels:latest-gpu .
+```
+- Deploy gpu function (large)
+```
+nuctl delete function -f pth-facebookresearch-sam2-large-gpu && ./serverless/deploy_gpu.sh serverless/pytorch/facebookresearch/sam2/nuclio && docker logs -f nuclio-nuclio-pth-facebookresearch-sam2-large-gpu
+```
+- Deploy gpu function (tiny)
+```
+nuctl delete function -f pth-facebookresearch-sam2-tiny-gpu && ./serverless/deploy_func_config.sh serverless/pytorch/facebookresearch/sam2/nuclio/function-tiny-gpu.yaml && docker logs -f nuclio-nuclio-pth-facebookresearch-sam2-tiny-gpu
+```
+
 
 
 - nuclio dashboard: localhost:8070

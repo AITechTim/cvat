@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: MIT
 
 metadata:
-  name: pth-facebookresearch-sam2-large-gpu
+  name: pth-facebookresearch-sam2-tiny-gpu
   namespace: cvat
   annotations:
-    name: Segment Anything 2.0 (large gpu)
+    name: Segment Anything 2.0 (tiny gpu)
     version: 2
     type: interactor
     spec:
@@ -16,19 +16,19 @@ metadata:
     help_message: The interactor allows to get a mask of an object using at least one positive, and any negative points inside it
 
 spec:
-  description: Interactive object segmentation with Segment-Anything 2.0 (sam2_hiera_large.pt on gpu)
+  description: Interactive object segmentation with Segment-Anything 2.0 (sam2_hiera_tiny.pt on gpu)
   runtime: 'python:3.9'
   handler: main:handler
   eventTimeout: 30s
 
   build:
-    image: cvat.pth.facebookresearch.sam2.large.gpu
+    image: cvat.pth.facebookresearch.sam2.tiny.gpu
     baseImage: sam2-samexport-allmodels:latest-gpu
     directives:
       preCopy:
       # set NVIDIA container runtime settings
         - kind: ENV
-          value: SAM2_MODEL=large
+          value: SAM2_MODEL=tiny
         - kind: ENV
           value: NVIDIA_VISIBLE_DEVICES=all
         - kind: ENV

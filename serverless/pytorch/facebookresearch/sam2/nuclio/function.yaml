@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: MIT
 
 metadata:
-  name: pth-facebookresearch-sam2-vit-h-allmodels
+  name: pth-facebookresearch-sam2-large-cpu
   namespace: cvat
   annotations:
-    name: Segment Anything 2.0 (all models)
+    name: Segment Anything 2.0 (large cpu)
     version: 2
     type: interactor
     spec:
@@ -22,12 +22,14 @@ spec:
   eventTimeout: 30s
 
   build:
-    image: cvat.pth.facebookresearch.sam2.vit_h_allmodels
-    baseImage: samexporter:latest
+    image: cvat.pth.facebookresearch.sam2.large.cpu
+    baseImage: sam2-samexport-allmodels:latest-cpu
 # pth-facebookresearch-sam2-vit-h-allmodels:latest
     directives:
       preCopy:
       # disable interactive frontend
+        - kind: ENV
+          value: SAM2_MODEL=large
         - kind: ENV
           value: DEBIAN_FRONTEND=noninteractive
       # set workdir

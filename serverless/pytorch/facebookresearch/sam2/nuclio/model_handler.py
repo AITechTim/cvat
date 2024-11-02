@@ -23,16 +23,21 @@ class ModelHandler:
         # onnx_model = onnx.load("./sam2_hiera_l_encoder.onnx")
         # self.ort_sess = ort.InferenceSession("./sam2_hiera_l_encoder.onnx")
         
+        self.model_cfg = "sam2_hiera_l.yaml"
+        self.sam_checkpoint = "./samexporter/original_models/sam2_hiera_large.pt"
         sam2_model = build_sam2(self.model_cfg, self.sam_checkpoint, device=self.device)
         self.sam2_encoder = SAM2ImageEncoder(sam2_model).cpu()
-        # self.sam_checkpoint = "./sam2_hiera_large.pt"
-        # self.model_cfg = "sam2_hiera_l.yaml"
         # self.predictor = SAM2ImagePredictor(build_sam2(self.model_cfg, self.sam_checkpoint, device=self.device))
 
     def handle(self, image, pos_points, neg_points):
         # pos_points, neg_points = list(pos_points), list(neg_points)
+        print("0.o")
         with torch.inference_mode():
-            high_res_feats_0, high_res_feats_1, image_embed = self.sam2_encoder(img)
+            print("0.1")
+
+            x = torch.from_numpy(np.array(image)).float()            
+            high_res_feats_0, high_res_feats_1, image_embed = self.sam2_encoder(x)
+            print("0.2")
 
             return high_res_feats_0, high_res_feats_1, image_embed
 

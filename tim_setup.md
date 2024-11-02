@@ -32,7 +32,6 @@ export ACME_EMAIL=schmittman@cancilico.com
 docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.https.yml -f components/serverless/docker-compose.serverless.yml up --build --remove-orphans
 
 
-
 docker exec -it cvat_server bash -ic 'python3 ~/manage.py createsuperuser'
 
 docker compose -f docker-compose.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml up
@@ -56,6 +55,21 @@ sudo mv nuctl-1.13.0-linux-amd64 /usr/local/bin/nuctl
 ./serverless/deploy_cpu.sh serverless/pytorch/facebookresearch/sam/nuclio
 ./serverless/deploy_cpu.sh serverless/pytorch/facebookresearch/sam2/nuclio
 - Port will change regularly, check nuclio dashboard matches docker ps. Otherwise delete function on dashboard and redeploy with above command.
+
+## Testing fininshed image as standalone container
+docker run --volume /var/lib/docker/volumes/nuclio-nuclio-pth-facebookresearch-sam2-vit-h-allmodels/_data:/etc/nuclio/config/processor cvat.pth.facebookresearch.sam2.vit_h_allmodels:latest processor
+## deploy finished image as nuclio function (Still has some issues. Get's registered in nuclio, but https://cvat.cancilico.site/api/lambda/functions gives 500 server error. Probably due to wrong config, should pass function.yaml as well.)
+nuctl deploy pth-facebookresearch-sam2-vit-h-allmodels --run-image cvat.pth.facebookresearch.sam2.vit_h_allmodels:latest  --handler main:handler --project-name cvat --platform local --runtime python:3.9
+
+nuctl delete function -f pth-facebookresearch-sam2-vit-h-allmodels && ./serverless/deploy_cpu.sh serverless/pytorch/facebookresearch/sam2/nuclio 
+
+docker run --volume nuclio-cvat-pth-facebookresearch-sam2-vit-h-allmodels:/etc/nuclio/config/processor cvat.pth.facebookresearch.sam2.vit_h_allmodels:latest processor
+
+nuctl deploy cvat.pth.facebookresearch.sam2.vit_h_allmodels:latest processor --handler main:handler --namespace cvat 
+
+
+
+nuctl deploy pth-facebookresearch-sam2-vit-h-allmodels --run-image nuclio/processor-pth-facebookresearch-sam2-vit-h-allmodels:latest --runtime python:3.10 --handler main:handler --namespace cvat 
 
 
 - nuclio dashboard: localhost:8070

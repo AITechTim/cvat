@@ -15,6 +15,7 @@ def init_context(context):
 
 def handler(context, event):
     try:
+        print("0.1")
         context.logger.info("call handler")
         data = event.body
         buf = io.BytesIO(base64.b64decode(data["image"]))
@@ -22,7 +23,7 @@ def handler(context, event):
         image = image.convert("RGB")  # to make sure image comes in RGB
         pos_points = data["pos_points"]
         neg_points = data["neg_points"]
-
+        print("0.2")
         # mask = context.user_data.model.handle(image, pos_points, neg_points)
         # features, high_res_features = context.user_data.model.handle(image, pos_points, neg_points)
         high_res_feats_0, high_res_feats_1, image_embed = context.user_data.model.handle(image, pos_points, neg_points)

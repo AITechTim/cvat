@@ -17,39 +17,49 @@ metadata:
 
 spec:
   description: Interactive object segmentation with Segment-Anything 2.0
-  runtime: 'python:3.8'
+  runtime: 'python:3.9'
   handler: main:handler
   eventTimeout: 30s
 
   build:
-    image: cvat.pth.facebookresearch.sam2.vit_h
-    baseImage: ubuntu:22.04
+    image: cvat.pth.facebookresearch.sam2.vit_h_allmodels
+    baseImage: samexporter:latest
+# pth-facebookresearch-sam2-vit-h-allmodels:latest
     directives:
       preCopy:
       # disable interactive frontend
         - kind: ENV
           value: DEBIAN_FRONTEND=noninteractive
       # set workdir
-        - kind: WORKDIR
-          value: /opt/nuclio/sam2
+        # - kind: WORKDIR
+        #   value: /opt/nuclio
       # install basic deps
-        - kind: RUN
-          value: apt-get update && apt-get -y install build-essential curl git python3 python3-pip ffmpeg libsm6 libxext6
+        # - kind: RUN
+        #   value: apt-get update && apt-get -y install build-essential curl git python3 python3-pip ffmpeg libsm6 libxext6
       # install sam2 code
-        - kind: RUN
-          value: SAM2_BUILD_CUDA=0 pip install git+https://github.com/facebookresearch/segment-anything-2.git@main
+        # - kind: RUN
+        #   value: SAM2_BUILD_CUDA=0 pip install git+https://github.com/facebookresearch/segment-anything-2.git@main
       # download sam2 weights
-        - kind: RUN
-          value: curl -O https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_large.pt
+        # - kind: RUN
+        #   value: curl -O https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_large.pt
         # map pip3 and python3 to pip and python
-        - kind: RUN
-          value: curl -O https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_base_plus.pt
-        - kind: RUN
-          value: curl -O https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_small.pt
-        - kind: RUN
-          value: curl -O https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_tiny.pt
-        - kind: RUN
-          value: ln -s /usr/bin/pip3 /usr/local/bin/pip && ln -s /usr/bin/python3 /usr/bin/python
+        # - kind: RUN
+        #   value: curl -O https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_base_plus.pt
+        # - kind: RUN
+        #   value: curl -O https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_small.pt
+        # - kind: RUN
+        #   value: curl -O https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_tiny.pt
+        # - kind: RUN
+        #   value: ln -s /usr/bin/pip3 /usr/local/bin/pip && ln -s /usr/bin/python3 /usr/bin/python
+        # - kind: RUN
+        #   value: python -m pip install --upgrade pip
+        # - kind: RUN
+        #   value: git clone https://github.com/AITechTim/samexporter.git
+        # - kind: RUN
+        #   value: pip install -e ./samexporter
+        # - kind: RUN
+        #   value: pip install numpy==1.26.*
+
   triggers:
     myHttpTrigger:
       maxWorkers: 2

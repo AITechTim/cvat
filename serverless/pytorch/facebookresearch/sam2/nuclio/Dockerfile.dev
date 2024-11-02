@@ -1,0 +1,16 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get -y install build-essential curl git python3 python3-pip ffmpeg libsm6 libxext6
+
+RUN ln -s /usr/bin/pip3 /usr/local/bin/pip && ln -s /usr/bin/python3 /usr/bin/python
+RUN python -m pip install --upgrade pip
+
+RUN SAM2_BUILD_CUDA=0 pip install git+https://github.com/facebookresearch/segment-anything-2.git@main
+
+RUN pip install onnx==1.16.2 onnxruntime==1.16.3 opencv-python==4.7.0.72 segment-anything==1.0 torch==2.4.0 torchvision timm onnxsim
+
+COPY ./samexporter ./samexporter
+RUN pip install -e ./samexporter
+
+RUN pip install numpy==1.26.*
